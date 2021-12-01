@@ -9,6 +9,13 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.last.courier_activity.CourierDeliveryStatusMapActivity;
+import com.example.last.customer_activity.CustomerDeliveryStatusMapActivity;
+import com.example.last.helper.FirebaseKeylist;
+import com.example.last.models.Order;
+//import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
@@ -25,11 +32,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import com.example.last.courier_activity.CourierDeliveryStatusMapActivity;
-import com.example.last.customer_activity.CustomerDeliveryStatusMapActivity;
-import com.example.last.helper.FirebaseKeylist;
-import com.example.last.models.Order;
 
 /**
  * Created by verzac on 6/3/2017.
@@ -52,15 +54,16 @@ public abstract class AuthAbstractActivity
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         // build api client for google (authentication) services
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id_google))
                 .requestEmail()
                 .build();
-//        m_APIClient = new GoogleApiClient.Builder(this)
-//                .enableAutoManage(this, this)
-//                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-//                .build();
+        m_APIClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
         m_Auth = FirebaseAuth.getInstance(); //FirebaseAuth instance
         // create the listener to detect when a user has logged in or logged out
         m_AuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -96,14 +99,14 @@ public abstract class AuthAbstractActivity
         // activities may call this method to indicate that the user wishes to sign out
         // basically causes the user to be unauthenticated
         m_Auth.signOut();
-//        Auth.GoogleSignInApi.signOut(m_APIClient);
-//        Auth.GoogleSignInApi.revokeAccess(m_APIClient);
+        Auth.GoogleSignInApi.signOut(m_APIClient);
+        Auth.GoogleSignInApi.revokeAccess(m_APIClient);
     }
 
     protected void googleSignIn(){
         // activities may call this method to indicate a user wishes to be authenticated
-//        Intent startIntent = Auth.GoogleSignInApi.getSignInIntent(m_APIClient);
-//        startActivityForResult(startIntent, RC_SIGN_IN); // start Google's default Sign-In activity
+        Intent startIntent = Auth.GoogleSignInApi.getSignInIntent(m_APIClient);
+        startActivityForResult(startIntent, RC_SIGN_IN); // start Google's default Sign-In activity
     }
 
     private void checkUserHasActiveOrder(){
@@ -192,21 +195,21 @@ public abstract class AuthAbstractActivity
         //empty method which can be overridden should the acivity wants to handle it
     }
 
-//    private void handleSignInResult(GoogleSignInResult result){
-//        // this method handles sign in results produced by Google Sign-In (signing in using Google ID)
-//        // @param result: the result of signing in through Google Sign-in, returned by the Sign-In activity
-////        Log.d("Google Sign-in", "handleSignInResult: " + result.isSuccess());
-////        Log.d("Google Sign-in", "handleSignInResult: " + String.valueOf(result.getStatus().getStatusCode()));
-////        if (result.isSuccess()){
-////            GoogleSignInAccount acct = result.getSignInAccount(); // get the resulting account
-////            fireBaseAuthWithGoogle(acct);
-//        }
-//        else{
-//            // Failed to log in
-//            Log.e("FBaseAuthSignin", "Failed to sign in!");
-//            Toast.makeText(this, getString(R.string.err_user_failed_to_authenticate), Toast.LENGTH_SHORT);
-//        }
-//    }
+    private void handleSignInResult(GoogleSignInResult result){
+        // this method handles sign in results produced by Google Sign-In (signing in using Google ID)
+        // @param result: the result of signing in through Google Sign-in, returned by the Sign-In activity
+        Log.d("Google Sign-in", "handleSignInResult: " + result.isSuccess());
+        Log.d("Google Sign-in", "handleSignInResult: " + String.valueOf(result.getStatus().getStatusCode()));
+        if (result.isSuccess()){
+            GoogleSignInAccount acct = result.getSignInAccount(); // get the resulting account
+            fireBaseAuthWithGoogle(acct);
+        }
+        else{
+            // Failed to log in
+            Log.e("FBaseAuthSignin", "Failed to sign in!");
+            Toast.makeText(this, getString(R.string.err_user_failed_to_authenticate), Toast.LENGTH_SHORT);
+        }
+    }
 
     private void fireBaseAuthWithGoogle(GoogleSignInAccount acct) {
         // this method uses the received Google Account credential to authenticate the user into TasteBuddy
@@ -261,13 +264,13 @@ public abstract class AuthAbstractActivity
     }
 
     //@Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data){
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == RC_SIGN_IN){
-//            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-//            handleSignInResult(result);
-//        }
-//    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN){
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
+    }
 
     protected abstract void setTitle(String available_order);
 }

@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">TasteBuddy</string>
+    <string name="app_name">Parcel</string>
     <!--Prompts and texts-->
     <string name="welcome_text">Welcome to TasteBuddy. Please sign in before using TasteBuddy.</string>
     <string name="welcome_text_on_login">You have successfully logged in as %1$s.</string>
